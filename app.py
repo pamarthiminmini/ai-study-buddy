@@ -4,6 +4,9 @@ import random
 import streamlit as st
 from google import genai
 
+if "last_call" not in st.session_state:
+    st.session_state.last_call = 0.0
+
 st.set_page_config(page_title="AI Study Buddy", layout="centered")
 st.title("📚 AI Study Buddy")
 
@@ -16,7 +19,13 @@ if not api_key:
 
 client = genai.Client(api_key=api_key)
 
-MODEL_NAME = "models/gemini-2.0-flash"   # if this errors, change to "gemini-1.5-flash"
+MODEL_NAME = "models/gemini-2.0-flash"
+
+now = time.time()
+if now - st.session_state.last_call < 10:
+    st.warning("Please wait ~10 seconds between runs to avoid rate limits.")
+    st.stop()
+st.session_state.last_call = now
 
 def call_gemini(prompt: str) -> str:
     for attempt in range(6):
@@ -24,18 +33,30 @@ def call_gemini(prompt: str) -> str:
             resp = client.models.generate_content(
                 model=MODEL_NAME,
                 contents=prompt,
-                config={"temperature": 0.6, "max_output_tokens": 250}
+                config={"temperature": 0.5, "max_output_tokens": 180}
             )
             return resp.text
+
         except Exception as e:
             msg = str(e)
-            # Handle rate limit
-            if "429" in msg or "RESOURCE_EXHAUSTED" in msg:
-                wait = min(60, (2 ** attempt) + random.uniform(0, 1))
-                time.sleep(wait)
+
+            # If API tells exact wait time
+            if "Please retry in" in msg:
+                try:
+                    retry_secs = float(msg.split("Please retry in")[1].split("seconds")[0].strip())
+                except:
+                    retry_secs = 30.0
+                time.sleep(retry_secs + 1)
                 continue
+
+            # Generic 429 backoff
+            if "429" in msg or "RESOURCE_EXHAUSTED" in msg:
+                time.sleep(min(60, (2 ** attempt) + random.uniform(0, 1)))
+                continue
+
             return f"❌ Error: {type(e).__name__} — {e}"
-    return "❌ Rate limit hit. Please try again in 1–2 minutes."
+
+    return "❌ Rate limit hit. Please wait 30–60 seconds and try again."
 
 mode = st.radio("Choose mode:", ["Explain Topic", "Summarize Notes", "Quiz + Flashcards"])
 topic = st.text_input("Topic (optional if you paste notes)")
