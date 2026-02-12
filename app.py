@@ -203,14 +203,5 @@ if submitted:
             )
             max_tokens = 300
 
-            with st.spinner("Generating flowchart..."):
-                mermaid = call_gemini(prompt, max_tokens=max_tokens)
-
-            mermaid = clean_mermaid(mermaid)
-
-            st.subheader("Flowchart")
-            render_mermaid(mermaid)
-            st.code(mermaid, language="text")
-
     finally:
         st.session_state.running = False
