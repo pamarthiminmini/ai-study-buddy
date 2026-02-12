@@ -24,7 +24,7 @@ def call_gemini(prompt: str) -> str:
             resp = client.models.generate_content(
                 model=MODEL_NAME,
                 contents=prompt,
-                config={"temperature": 0.6, "max_output_tokens": 400}
+                config={"temperature": 0.6, "max_output_tokens": 250}
             )
             return resp.text
         except Exception as e:
