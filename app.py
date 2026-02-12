@@ -3,17 +3,30 @@ import time
 import random
 import streamlit as st
 from google import genai
-
+import re
 import streamlit.components.v1 as components
 
-def render_mermaid(mermaid_code: str, height: int = 450):
+def clean_mermaid(text: str) -> str:
+    """Remove ```mermaid fences and keep only diagram code."""
+    if not text:
+        return ""
+    text = text.strip()
+    # Remove fenced code blocks if present
+    text = re.sub(r"^```mermaid\s*", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"^```\s*", "", text)
+    text = re.sub(r"\s*```$", "", text)
+    return text.strip()
+
+def render_mermaid(mermaid_code: str, height: int = 520):
+    mermaid_code = clean_mermaid(mermaid_code)
     html = f"""
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <div class="mermaid">
     {mermaid_code}
     </div>
     <script>
-      mermaid.initialize({{ startOnLoad: true }});
+      mermaid.initialize({{ startOnLoad: false }});
+      mermaid.run();
     </script>
     """
     components.html(html, height=height, scrolling=True)
@@ -176,35 +189,28 @@ if submitted:
             max_tokens = 500
 
         elif mode == "Flowchart":
-    content = notes.strip() if notes.strip() else topic.strip()
-    if not content:
-        st.warning("Enter a topic or paste steps/notes to create a flowchart.")
-        st.stop()
+            content = notes.strip() if notes.strip() else topic.strip()
+            if not content:
+                st.warning("Enter a topic or paste steps.")
+                st.stop()
 
-    prompt = (
-        "Create a Mermaid flowchart for the process described below.\n"
-        "Rules:\n"
-        "- Output ONLY Mermaid code (no explanation)\n"
-        "- Use flowchart TD\n"
-        "- Keep it small: 8–12 nodes max\n"
-        "- Use clear labels\n\n"
-        f"CONTENT:\n{content}"
-    )
-    max_tokens = 500
+            prompt = (
+                "Create a Mermaid flowchart.\n"
+                "- Output ONLY Mermaid code\n"
+                "- Start with: flowchart TD\n"
+                "- 8–12 nodes max\n\n"
+                f"CONTENT:\n{content}"
+            )
+            max_tokens = 300
 
-    with st.spinner("Generating flowchart…"):
-        mermaid = call_gemini(prompt, max_tokens=max_tokens)
+            with st.spinner("Generating flowchart..."):
+                mermaid = call_gemini(prompt, max_tokens=max_tokens)
 
-    st.subheader("Flowchart")
-    render_mermaid(mermaid)
-    st.code(mermaid, language="markdown")
-    st.stop()
+            mermaid = clean_mermaid(mermaid)
 
-        with st.spinner("Generating…"):
-            out = call_gemini(prompt, max_tokens=max_tokens)
-
-        st.success("Done ✅")
-        st.write(out)
+            st.subheader("Flowchart")
+            render_mermaid(mermaid)
+            st.code(mermaid, language="text")
 
     finally:
         st.session_state.running = False
