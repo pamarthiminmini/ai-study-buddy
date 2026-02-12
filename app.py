@@ -4,12 +4,26 @@ import random
 import streamlit as st
 from google import genai
 
+import streamlit.components.v1 as components
+
+def render_mermaid(mermaid_code: str, height: int = 450):
+    html = f"""
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <div class="mermaid">
+    {mermaid_code}
+    </div>
+    <script>
+      mermaid.initialize({{ startOnLoad: true }});
+    </script>
+    """
+    components.html(html, height=height, scrolling=True)
+
 # ----------------------------
 # Page setup
 # ----------------------------
 st.set_page_config(page_title="AI Study Buddy", layout="centered")
 st.title("📚 AI Study Buddy")
-st.caption("Explain topics, summarize notes, and generate quizzes + flashcards.")
+st.caption("Explain topics, summarize notes, generate quizzes + flashcards, and flowchart.")
 
 # ----------------------------
 # Session state (prevents reruns interrupting generation)
@@ -160,6 +174,31 @@ if submitted:
                 f"CONTENT:\n{content}"
             )
             max_tokens = 500
+
+        elif mode == "Flowchart":
+    content = notes.strip() if notes.strip() else topic.strip()
+    if not content:
+        st.warning("Enter a topic or paste steps/notes to create a flowchart.")
+        st.stop()
+
+    prompt = (
+        "Create a Mermaid flowchart for the process described below.\n"
+        "Rules:\n"
+        "- Output ONLY Mermaid code (no explanation)\n"
+        "- Use flowchart TD\n"
+        "- Keep it small: 8–12 nodes max\n"
+        "- Use clear labels\n\n"
+        f"CONTENT:\n{content}"
+    )
+    max_tokens = 500
+
+    with st.spinner("Generating flowchart…"):
+        mermaid = call_gemini(prompt, max_tokens=max_tokens)
+
+    st.subheader("Flowchart")
+    render_mermaid(mermaid)
+    st.code(mermaid, language="markdown")
+    st.stop()
 
         with st.spinner("Generating…"):
             out = call_gemini(prompt, max_tokens=max_tokens)
