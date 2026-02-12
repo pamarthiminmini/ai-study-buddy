@@ -100,7 +100,7 @@ def call_gemini(prompt: str, max_tokens: int) -> str:
 with st.form("study_buddy_form", clear_on_submit=False):
     mode = st.radio(
         "Choose mode:",
-        ["Explain Topic", "Summarize Notes", "Quiz + Flashcards"],
+        ["Explain Topic", "Summarize Notes", "Quiz + Flashcards", "Flowchart"],
         disabled=st.session_state.running,
     )
 
