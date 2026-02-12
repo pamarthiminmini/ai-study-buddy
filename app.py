@@ -137,7 +137,7 @@ if submitted:
                 "1) 8 bullet key points\n"
                 "2) Definitions (if any)\n"
                 "3) Formulas (if any)\n"
-                "4) 5 flashcards (Front | Back)\n\n"
+                "4) 3 flashcards (Front | Back)\n\n"
                 f"NOTES:\n{notes}"
             )
             max_tokens = 800
@@ -155,7 +155,7 @@ if submitted:
                 "- 3 MCQ (A-D + correct answer)\n"
                 "- 1 short answer (model answer)\n"
                 "- 1 true/false (answer)\n\n"
-                "B) Flashcards (8)\n"
+                "B) Flashcards (3)\n"
                 "- Front: ... | Back: ...\n\n"
                 f"CONTENT:\n{content}"
             )
