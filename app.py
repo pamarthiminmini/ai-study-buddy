@@ -3,40 +3,13 @@ import time
 import random
 import streamlit as st
 from google import genai
-import re
-import streamlit.components.v1 as components
-
-def clean_mermaid(text: str) -> str:
-    """Remove ```mermaid fences and keep only diagram code."""
-    if not text:
-        return ""
-    text = text.strip()
-    # Remove fenced code blocks if present
-    text = re.sub(r"^```mermaid\s*", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"^```\s*", "", text)
-    text = re.sub(r"\s*```$", "", text)
-    return text.strip()
-
-def render_mermaid(mermaid_code: str, height: int = 520):
-    mermaid_code = clean_mermaid(mermaid_code)
-    html = f"""
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-    <div class="mermaid">
-    {mermaid_code}
-    </div>
-    <script>
-      mermaid.initialize({{ startOnLoad: false }});
-      mermaid.run();
-    </script>
-    """
-    components.html(html, height=height, scrolling=True)
 
 # ----------------------------
 # Page setup
 # ----------------------------
 st.set_page_config(page_title="AI Study Buddy", layout="centered")
 st.title("📚 AI Study Buddy")
-st.caption("Explain topics, summarize notes, generate quizzes + flashcards, and flowchart.")
+st.caption("Explain topics, summarize notes, and generate quizzes + flashcards.")
 
 # ----------------------------
 # Session state (prevents reruns interrupting generation)
@@ -113,7 +86,7 @@ def call_gemini(prompt: str, max_tokens: int) -> str:
 with st.form("study_buddy_form", clear_on_submit=False):
     mode = st.radio(
         "Choose mode:",
-        ["Explain Topic", "Summarize Notes", "Quiz + Flashcards", "Flowchart"],
+        ["Explain Topic", "Summarize Notes", "Quiz + Flashcards"],
         disabled=st.session_state.running,
     )
 
@@ -187,21 +160,6 @@ if submitted:
                 f"CONTENT:\n{content}"
             )
             max_tokens = 500
-
-        elif mode == "Flowchart":
-            content = notes.strip() if notes.strip() else topic.strip()
-            if not content:
-                st.warning("Enter a topic or paste steps.")
-                st.stop()
-
-            prompt = (
-                "Create a Mermaid flowchart.\n"
-                "- Output ONLY Mermaid code\n"
-                "- Start with: flowchart TD\n"
-                "- 8–12 nodes max\n\n"
-                f"CONTENT:\n{content}"
-            )
-            max_tokens = 300
 
     finally:
         st.session_state.running = False
