@@ -16,7 +16,7 @@ if not api_key:
 
 client = genai.Client(api_key=api_key)
 
-MODEL_NAME = "gemini-2.0-flash"   # if this errors, change to "gemini-1.5-flash"
+MODEL_NAME = "gemini-1.5-flash"   # if this errors, change to "gemini-1.5-flash"
 
 def call_gemini(prompt: str) -> str:
     for attempt in range(6):
