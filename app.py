@@ -120,7 +120,7 @@ if submitted:
             prompt = (
                 f"Explain '{topic}' for a student.\n"
                 "Output:\n"
-                "- Exactly 8 bullet points(short)\n"
+                "- Exactly 8 bullet points\n"
                 "- 1 simple real-world example\n"
                 "- 3 quick check questions(complete sentences)\n"
             )
