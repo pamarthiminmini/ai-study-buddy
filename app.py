@@ -160,6 +160,12 @@ if submitted:
                 f"CONTENT:\n{content}"
             )
             max_tokens = 500
+            # ✅ Call Gemini + show result
+        with st.spinner("Generating..."):
+            out = call_gemini(prompt, max_tokens=max_tokens)
 
+        st.success("Done ✅")
+        st.write(out)
+        
     finally:
         st.session_state.running = False
