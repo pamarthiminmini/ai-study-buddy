@@ -120,11 +120,11 @@ if submitted:
             prompt = (
                 f"Explain '{topic}' for a student.\n"
                 "Output:\n"
-                "- Exactly 8 bullet points\n"
+                "- Exactly 8 bullet points(short)\n"
                 "- 1 simple real-world example\n"
-                "- 3 quick check questions\n"
+                "- 3 quick check questions(complete sentences)\n"
             )
-            max_tokens = 520
+            max_tokens = 800
 
         elif mode == "Summarize Notes":
             if not notes.strip():
@@ -140,7 +140,7 @@ if submitted:
                 "4) 5 flashcards (Front | Back)\n\n"
                 f"NOTES:\n{notes}"
             )
-            max_tokens = 600
+            max_tokens = 800
 
         else:  # Quiz + Flashcards
             content = notes.strip() if notes.strip() else topic.strip()
@@ -159,7 +159,7 @@ if submitted:
                 "- Front: ... | Back: ...\n\n"
                 f"CONTENT:\n{content}"
             )
-            max_tokens = 380
+            max_tokens = 500
 
         with st.spinner("Generating…"):
             out = call_gemini(prompt, max_tokens=max_tokens)
